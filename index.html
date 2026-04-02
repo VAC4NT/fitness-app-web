@@ -774,6 +774,7 @@
                 <div class="tabs">
                     <div class="tab active" onclick="switchQuickTab('exercise')">自由训练</div>
                     <div class="tab" onclick="switchQuickTab('plan')">使用计划</div>
+                    <div class="tab" onclick="switchQuickTab('custom')">自定义动作</div>
                 </div>
                 <div id="quick-tab-exercise">
                     <div class="form-group">
@@ -786,16 +787,74 @@
                             <button class="filter-chip" onclick="filterExercises('shoulders')">肩部</button>
                             <button class="filter-chip" onclick="filterExercises('arms')">手臂</button>
                             <button class="filter-chip" onclick="filterExercises('core')">核心</button>
+                            <button class="filter-chip" onclick="filterExercises('custom')" style="background: var(--accent-purple); color: white;">自定义</button>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>选择动作</label>
                         <div class="exercise-grid" id="exercise-grid"></div>
                     </div>
+                    <button class="add-set-btn" onclick="openAddExerciseModal()" style="margin-top: 12px;">
+                        ➕ 添加自定义动作
+                    </button>
                 </div>
                 <div id="quick-tab-plan" style="display: none;">
                     <div id="plan-select-list"></div>
                 </div>
+                <div id="quick-tab-custom" style="display: none;">
+                    <div id="custom-exercise-list"></div>
+                    <button class="btn btn-accent btn-full" onclick="openAddExerciseModal()" style="margin-top: 16px;">
+                        ➕ 创建新动作
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加自定义动作模态框 -->
+    <div class="modal-overlay" id="modal-add-exercise">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>➕ 添加自定义动作</h3>
+                <button class="modal-close" onclick="closeModal('modal-add-exercise')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>动作名称 *</label>
+                    <input type="text" id="new-exercise-name" placeholder="例如：哑铃卧推、器械夹胸">
+                </div>
+                <div class="form-group">
+                    <label>部位 *</label>
+                    <select id="new-exercise-muscle">
+                        <option value="chest">胸部</option>
+                        <option value="back">背部</option>
+                        <option value="legs">腿部</option>
+                        <option value="shoulders">肩部</option>
+                        <option value="arms">手臂</option>
+                        <option value="core">核心</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>图标</label>
+                    <div class="filter-chips" id="emoji-selector">
+                        <button class="filter-chip active" onclick="selectEmoji('🏋️')">🏋️</button>
+                        <button class="filter-chip" onclick="selectEmoji('💪')">💪</button>
+                        <button class="filter-chip" onclick="selectEmoji('🦵')">🦵</button>
+                        <button class="filter-chip" onclick="selectEmoji('🧘')">🧘</button>
+                        <button class="filter-chip" onclick="selectEmoji('🦅')">🦅</button>
+                        <button class="filter-chip" onclick="selectEmoji('🎯')">🎯</button>
+                        <button class="filter-chip" onclick="selectEmoji('⚡')">⚡</button>
+                        <button class="filter-chip" onclick="selectEmoji('🔥')">🔥</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>动作说明（可选）</label>
+                    <input type="text" id="new-exercise-desc" placeholder="例如：锻炼胸大肌中部">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" style="flex: 1; color: var(--text-light);" onclick="closeModal('modal-add-exercise')">取消</button>
+                <button class="btn btn-accent" style="flex: 2;" onclick="saveCustomExercise()">✅ 保存</button>
             </div>
         </div>
     </div>
@@ -962,38 +1021,60 @@
 
     <script>
         // ========== 数据 ==========
-        const exercises = [
-            { id: 'benchPress', name: '卧推', emoji: '🏋️', muscle: 'chest' },
-            { id: 'inclinePress', name: '上斜卧推', emoji: '🏋️', muscle: 'chest' },
-            { id: 'dumbbellFly', name: '哑铃飞鸟', emoji: '🦅', muscle: 'chest' },
-            { id: 'cableCross', name: '钢线交叉', emoji: '🏋️', muscle: 'chest' },
-            { id: 'deadlift', name: '硬拉', emoji: '🏋️', muscle: 'back' },
-            { id: 'latPulldown', name: '高位下拉', emoji: '🏋️', muscle: 'back' },
-            { id: 'barbellRow', name: '杠铃划船', emoji: '🏋️', muscle: 'back' },
-            { id: 'pullUp', name: '引体向上', emoji: '💪', muscle: 'back' },
-            { id: 'seatedRow', name: '坐姿划船', emoji: '🏋️', muscle: 'back' },
-            { id: 'squat', name: '深蹲', emoji: '🦵', muscle: 'legs' },
-            { id: 'legPress', name: '腿举', emoji: '🦵', muscle: 'legs' },
-            { id: 'legExtension', name: '腿屈伸', emoji: '🦵', muscle: 'legs' },
-            { id: 'legCurl', name: '腿弯举', emoji: '🦵', muscle: 'legs' },
-            { id: 'calfRaise', name: '提踵', emoji: '🦵', muscle: 'legs' },
-            { id: 'lunge', name: '箭步蹲', emoji: '🦵', muscle: 'legs' },
-            { id: 'overheadPress', name: '肩推', emoji: '🏋️', muscle: 'shoulders' },
-            { id: 'lateralRaise', name: '侧平举', emoji: '💪', muscle: 'shoulders' },
-            { id: 'facePull', name: '面拉', emoji: '🏋️', muscle: 'shoulders' },
-            { id: 'frontRaise', name: '前平举', emoji: '💪', muscle: 'shoulders' },
-            { id: 'bicepCurl', name: '二头弯举', emoji: '💪', muscle: 'arms' },
-            { id: 'hammerCurl', name: '锤式弯举', emoji: '💪', muscle: 'arms' },
-            { id: 'tricepPushdown', name: '三头下压', emoji: '💪', muscle: 'arms' },
-            { id: 'skullCrusher', name: '仰卧臂屈伸', emoji: '💪', muscle: 'arms' },
-            { id: 'dip', name: '双杠臂屈伸', emoji: '💪', muscle: 'arms' },
-            { id: 'plank', name: '平板支撑', emoji: '🧘', muscle: 'core' },
-            { id: 'crunch', name: '卷腹', emoji: '🧘', muscle: 'core' },
-            { id: 'legRaise', name: '悬垂举腿', emoji: '🧘', muscle: 'core' },
-            { id: 'russianTwist', name: '俄罗斯转体', emoji: '🧘', muscle: 'core' },
+        const defaultExercises = [
+            // 胸部
+            { id: 'benchPress', name: '卧推', emoji: '🏋️', muscle: 'chest', description: '杠铃卧推，胸肌王牌动作' },
+            { id: 'inclinePress', name: '上斜卧推', emoji: '🏋️', muscle: 'chest', description: '上斜30-45度，刺激上胸' },
+            { id: 'dumbbellPress', name: '哑铃卧推', emoji: '🏋️', muscle: 'chest', description: '哑铃卧推，更好拉伸' },
+            { id: 'dumbbellFly', name: '哑铃飞鸟', emoji: '🦅', muscle: 'chest', description: '胸肌拉伸与收缩' },
+            { id: 'cableCross', name: '钢线交叉', emoji: '🏋️', muscle: 'chest', description: '龙门架夹胸' },
+            { id: 'chestDip', name: '双杠臂屈伸', emoji: '💪', muscle: 'chest', description: '身体前倾刺激下胸' },
+            // 背部
+            { id: 'deadlift', name: '硬拉', emoji: '🏋️', muscle: 'back', description: '复合动作之王' },
+            { id: 'latPulldown', name: '高位下拉', emoji: '🏋️', muscle: 'back', description: '背阔肌宽度' },
+            { id: 'barbellRow', name: '杠铃划船', emoji: '🏋️', muscle: 'back', description: '背部厚度首选' },
+            { id: 'pullUp', name: '引体向上', emoji: '💪', muscle: 'back', description: '自重背部训练' },
+            { id: 'seatedRow', name: '坐姿划船', emoji: '🏋️', muscle: 'back', description: '中背与背阔肌' },
+            { id: 'oneArmDumbbellRow', name: '单臂哑铃划船', emoji: '🏋️', muscle: 'back', description: '单侧背部刺激' },
+            { id: 'tBarRow', name: 'T杠划船', emoji: '🏋️', muscle: 'back', description: '背部厚度' },
+            // 腿部
+            { id: 'squat', name: '深蹲', emoji: '🦵', muscle: 'legs', description: '腿部王牌动作' },
+            { id: 'legPress', name: '腿举', emoji: '🦵', muscle: 'legs', description: '器械深蹲替代' },
+            { id: 'legExtension', name: '腿屈伸', emoji: '🦵', muscle: 'legs', description: '股四头肌孤立' },
+            { id: 'legCurl', name: '腿弯举', emoji: '🦵', muscle: 'legs', description: '股二头肌孤立' },
+            { id: 'romanianDeadlift', name: '罗马尼亚硬拉', emoji: '🦵', muscle: 'legs', description: '腘绳肌与臀部' },
+            { id: 'calfRaise', name: '提踵', emoji: '🦵', muscle: 'legs', description: '小腿肌群' },
+            { id: 'lunge', name: '箭步蹲', emoji: '🦵', muscle: 'legs', description: '单腿力量' },
+            { id: 'hipThrust', name: '臀推', emoji: '🦵', muscle: 'legs', description: '臀部训练首选' },
+            { id: 'gobletSquat', name: '高脚杯深蹲', emoji: '🦵', muscle: 'legs', description: '适合新手的深蹲变式' },
+            // 肩部
+            { id: 'overheadPress', name: '站姿肩推', emoji: '🏋️', muscle: 'shoulders', description: '三角肌前束与中束' },
+            { id: 'seatedPress', name: '坐姿肩推', emoji: '🏋️', muscle: 'shoulders', description: '更稳定的肩推' },
+            { id: 'lateralRaise', name: '侧平举', emoji: '💪', muscle: 'shoulders', description: '三角肌中束孤立' },
+            { id: 'facePull', name: '面拉', emoji: '🏋️', muscle: 'shoulders', description: '三角肌后束与肩袖' },
+            { id: 'frontRaise', name: '前平举', emoji: '💪', muscle: 'shoulders', description: '三角肌前束' },
+            { id: 'arnoldPress', name: '阿诺德推举', emoji: '🏋️', muscle: 'shoulders', description: '旋转式肩推' },
+            // 手臂
+            { id: 'bicepCurl', name: '杠铃弯举', emoji: '💪', muscle: 'arms', description: '肱二头肌主力' },
+            { id: 'dumbbellCurl', name: '哑铃弯举', emoji: '💪', muscle: 'arms', description: '二头肌孤立' },
+            { id: 'hammerCurl', name: '锤式弯举', emoji: '💪', muscle: 'arms', description: '肱肌与肱桡肌' },
+            { id: 'tricepPushdown', name: '三头下压', emoji: '💪', muscle: 'arms', description: '肱三头肌孤立' },
+            { id: 'skullCrusher', name: '仰卧臂屈伸', emoji: '💪', muscle: 'arms', description: '肱三头肌长头' },
+            { id: 'dip', name: '双杠臂屈伸', emoji: '💪', muscle: 'arms', description: '三头肌复合动作' },
+            { id: 'closeGripBench', name: '窄握卧推', emoji: '🏋️', muscle: 'arms', description: '三头肌推类动作' },
+            { id: 'overheadTricepExt', name: '过头臂屈伸', emoji: '💪', muscle: 'arms', description: '三头肌长头拉伸' },
+            // 核心
+            { id: 'plank', name: '平板支撑', emoji: '🧘', muscle: 'core', description: '核心稳定性' },
+            { id: 'crunch', name: '卷腹', emoji: '🧘', muscle: 'core', description: '腹直肌上腹' },
+            { id: 'legRaise', name: '悬垂举腿', emoji: '🧘', muscle: 'core', description: '腹直肌下腹' },
+            { id: 'russianTwist', name: '俄罗斯转体', emoji: '🧘', muscle: 'core', description: '腹斜肌' },
+            { id: 'cableCrunch', name: '钢线卷腹', emoji: '🧘', muscle: 'core', description: '负重卷腹' },
+            { id: 'abWheel', name: '健腹轮', emoji: '🧘', muscle: 'core', description: '核心整体强化' },
         ];
 
         // 存储
+        let customExercises = JSON.parse(localStorage.getItem('customExercises') || '[]');
+        let exercises = [...defaultExercises, ...customExercises];
         let workouts = JSON.parse(localStorage.getItem('workouts') || '[]');
         let plans = JSON.parse(localStorage.getItem('plans') || '[]');
         let selectedExercise = null;
@@ -1051,31 +1132,109 @@
             else greeting.textContent = '晚上好！🌙';
         }
 
-        // ========== 预设计划 ==========
+        // ========== 专业增肌训练计划 ==========
         function initDefaultPlans() {
             if (plans.length === 0) {
                 plans = [
-                    { id: 'default-push', name: '推日', type: 'push', isDefault: true, exercises: [
-                        { exerciseId: 'benchPress', sets: 4, reps: 8 },
-                        { exerciseId: 'inclinePress', sets: 3, reps: 10 },
-                        { exerciseId: 'overheadPress', sets: 4, reps: 8 },
-                        { exerciseId: 'lateralRaise', sets: 3, reps: 12 },
-                        { exerciseId: 'tricepPushdown', sets: 3, reps: 12 }
+                    // PPL分化 - 推日A (胸/肩/三头)
+                    { id: 'default-push-a', name: '推日A - 胸肩三头', type: 'push', isDefault: true, 
+                      description: '专注于胸大肌和三角肌前束的发展',
+                      exercises: [
+                        { exerciseId: 'benchPress', sets: 4, reps: 6, rest: 180 },
+                        { exerciseId: 'inclinePress', sets: 3, reps: 8, rest: 120 },
+                        { exerciseId: 'dumbbellPress', sets: 3, reps: 10, rest: 90 },
+                        { exerciseId: 'overheadPress', sets: 4, reps: 8, rest: 120 },
+                        { exerciseId: 'lateralRaise', sets: 4, reps: 12, rest: 60 },
+                        { exerciseId: 'tricepPushdown', sets: 3, reps: 12, rest: 60 },
+                        { exerciseId: 'skullCrusher', sets: 3, reps: 10, rest: 60 }
                     ]},
-                    { id: 'default-pull', name: '拉日', type: 'pull', isDefault: true, exercises: [
-                        { exerciseId: 'deadlift', sets: 4, reps: 5 },
-                        { exerciseId: 'latPulldown', sets: 4, reps: 10 },
-                        { exerciseId: 'barbellRow', sets: 4, reps: 8 },
-                        { exerciseId: 'facePull', sets: 3, reps: 15 },
-                        { exerciseId: 'bicepCurl', sets: 3, reps: 12 }
+                    // PPL分化 - 拉日A (背/二头)
+                    { id: 'default-pull-a', name: '拉日A - 背二头', type: 'pull', isDefault: true,
+                      description: '发展背阔肌宽度和厚度',
+                      exercises: [
+                        { exerciseId: 'deadlift', sets: 4, reps: 5, rest: 180 },
+                        { exerciseId: 'pullUp', sets: 4, reps: 8, rest: 120 },
+                        { exerciseId: 'barbellRow', sets: 4, reps: 8, rest: 120 },
+                        { exerciseId: 'seatedRow', sets: 3, reps: 10, rest: 90 },
+                        { exerciseId: 'facePull', sets: 4, reps: 15, rest: 60 },
+                        { exerciseId: 'bicepCurl', sets: 3, reps: 10, rest: 60 },
+                        { exerciseId: 'hammerCurl', sets: 3, reps: 12, rest: 60 }
                     ]},
-                    { id: 'default-legs', name: '腿部日', type: 'legs', isDefault: true, exercises: [
-                        { exerciseId: 'squat', sets: 5, reps: 5 },
-                        { exerciseId: 'legPress', sets: 4, reps: 10 },
-                        { exerciseId: 'legExtension', sets: 3, reps: 12 },
-                        { exerciseId: 'legCurl', sets: 3, reps: 12 },
-                        { exerciseId: 'calfRaise', sets: 4, reps: 15 }
-                    ]}
+                    // PPL分化 - 腿日
+                    { id: 'default-legs', name: '腿部日 - 深蹲专项', type: 'legs', isDefault: true,
+                      description: '股四头肌为主，兼顾腘绳肌',
+                      exercises: [
+                        { exerciseId: 'squat', sets: 5, reps: 5, rest: 180 },
+                        { exerciseId: 'legPress', sets: 4, reps: 10, rest: 120 },
+                        { exerciseId: 'lunge', sets: 3, reps: 10, rest: 90 },
+                        { exerciseId: 'legExtension', sets: 3, reps: 12, rest: 60 },
+                        { exerciseId: 'romanianDeadlift', sets: 4, reps: 8, rest: 120 },
+                        { exerciseId: 'legCurl', sets: 3, reps: 12, rest: 60 },
+                        { exerciseId: 'calfRaise', sets: 4, reps: 15, rest: 60 }
+                    ]},
+                    // PPL分化 - 推日B (胸/肩/三头变式)
+                    { id: 'default-push-b', name: '推日B - 上胸肩中束', type: 'push', isDefault: true,
+                      description: '上胸和中束专项训练',
+                      exercises: [
+                        { exerciseId: 'inclinePress', sets: 4, reps: 8, rest: 150 },
+                        { exerciseId: 'dumbbellPress', sets: 4, reps: 8, rest: 120 },
+                        { exerciseId: 'dumbbellFly', sets: 3, reps: 12, rest: 90 },
+                        { exerciseId: 'seatedPress', sets: 4, reps: 8, rest: 120 },
+                        { exerciseId: 'lateralRaise', sets: 5, reps: 12, rest: 60 },
+                        { exerciseId: 'facePull', sets: 3, reps: 15, rest: 60 },
+                        { exerciseId: 'dip', sets: 3, reps: 10, rest: 90 }
+                    ]},
+                    // PPL分化 - 拉日B (背/二头变式)
+                    { id: 'default-pull-b', name: '拉日B - 硬拉划船', type: 'pull', isDefault: true,
+                      description: '背部厚度与二头肌训练',
+                      exercises: [
+                        { exerciseId: 'deadlift', sets: 3, reps: 5, rest: 180 },
+                        { exerciseId: 'latPulldown', sets: 4, reps: 10, rest: 120 },
+                        { exerciseId: 'tBarRow', sets: 4, reps: 8, rest: 120 },
+                        { exerciseId: 'oneArmDumbbellRow', sets: 3, reps: 10, rest: 90 },
+                        { exerciseId: 'facePull', sets: 3, reps: 15, rest: 60 },
+                        { exerciseId: 'dumbbellCurl', sets: 3, reps: 12, rest: 60 },
+                        { exerciseId: 'overheadTricepExt', sets: 3, reps: 12, rest: 60 }
+                    ]},
+                    // 阿诺德分化 - 胸背超级组
+                    { id: 'arnold-chest-back', name: '阿诺德胸背日', type: 'full', isDefault: true,
+                      description: '经典阿诺德分化，胸背超级组',
+                      exercises: [
+                        { exerciseId: 'benchPress', sets: 5, reps: 6, rest: 120 },
+                        { exerciseId: 'pullUp', sets: 5, reps: 8, rest: 120 },
+                        { exerciseId: 'inclinePress', sets: 4, reps: 8, rest: 90 },
+                        { exerciseId: 'barbellRow', sets: 4, reps: 8, rest: 90 },
+                        { exerciseId: 'dumbbellFly', sets: 3, reps: 12, rest: 60 },
+                        { exerciseId: 'latPulldown', sets: 3, reps: 10, rest: 60 },
+                        { exerciseId: 'cableCross', sets: 3, reps: 12, rest: 60 }
+                    ]},
+                    // 肩臂专项日
+                    { id: 'default-shoulder-arms', name: '肩臂专项日', type: 'push', isDefault: true,
+                      description: '三角肌和手臂专项训练',
+                      exercises: [
+                        { exerciseId: 'seatedPress', sets: 4, reps: 8, rest: 120 },
+                        { exerciseId: 'arnoldPress', sets: 3, reps: 10, rest: 90 },
+                        { exerciseId: 'lateralRaise', sets: 4, reps: 12, rest: 60 },
+                        { exerciseId: 'frontRaise', sets: 3, reps: 12, rest: 60 },
+                        { exerciseId: 'facePull', sets: 4, reps: 15, rest: 60 },
+                        { exerciseId: 'bicepCurl', sets: 4, reps: 10, rest: 60 },
+                        { exerciseId: 'hammerCurl', sets: 3, reps: 12, rest: 60 },
+                        { exerciseId: 'closeGripBench', sets: 3, reps: 10, rest: 90 },
+                        { exerciseId: 'tricepPushdown', sets: 3, reps: 12, rest: 60 }
+                    ]},
+                    // 全身训练 (适合新手)
+                    { id: 'default-full-body', name: '全身训练A', type: 'full', isDefault: true,
+                      description: '适合新手的全身训练计划',
+                      exercises: [
+                        { exerciseId: 'gobletSquat', sets: 3, reps: 10, rest: 120 },
+                        { exerciseId: 'benchPress', sets: 3, reps: 10, rest: 120 },
+                        { exerciseId: 'barbellRow', sets: 3, reps: 10, rest: 120 },
+                        { exerciseId: 'overheadPress', sets: 3, reps: 10, rest: 90 },
+                        { exerciseId: 'romanianDeadlift', sets: 3, reps: 10, rest: 120 },
+                        { exerciseId: 'bicepCurl', sets: 2, reps: 12, rest: 60 },
+                        { exerciseId: 'tricepPushdown', sets: 2, reps: 12, rest: 60 },
+                        { exerciseId: 'plank', sets: 3, reps: 30, rest: 60 }
+                    ]},
                 ];
                 localStorage.setItem('plans', JSON.stringify(plans));
             }
@@ -1115,14 +1274,20 @@
         // ========== 渲染 ==========
         function renderExerciseGrid() {
             const grid = document.getElementById('exercise-grid');
-            const filtered = currentMuscleFilter === 'all' 
-                ? exercises 
-                : exercises.filter(ex => ex.muscle === currentMuscleFilter);
+            
+            let filtered;
+            if (currentMuscleFilter === 'all') {
+                filtered = exercises;
+            } else if (currentMuscleFilter === 'custom') {
+                filtered = customExercises;
+            } else {
+                filtered = exercises.filter(ex => ex.muscle === currentMuscleFilter);
+            }
             
             grid.innerHTML = filtered.map(ex => `
-                <div class="exercise-item" onclick="selectExercise('${ex.id}')">
+                <div class="exercise-item" onclick="selectExercise('${ex.id}')" title="${ex.description || ''}">
                     <span class="emoji">${ex.emoji}</span>
-                    <span class="name">${ex.name}</span>
+                    <span class="name">${ex.name}${ex.isCustom ? '*' : ''}</span>
                 </div>
             `).join('');
         }
@@ -1207,6 +1372,121 @@
             event.target.classList.add('active');
             document.getElementById('quick-tab-exercise').style.display = tab === 'exercise' ? 'block' : 'none';
             document.getElementById('quick-tab-plan').style.display = tab === 'plan' ? 'block' : 'none';
+            document.getElementById('quick-tab-custom').style.display = tab === 'custom' ? 'block' : 'none';
+            
+            if (tab === 'custom') {
+                renderCustomExercises();
+            }
+        }
+
+        // ========== 自定义动作管理 ==========
+        let selectedEmoji = '🏋️';
+
+        function openAddExerciseModal() {
+            document.getElementById('new-exercise-name').value = '';
+            document.getElementById('new-exercise-muscle').value = 'chest';
+            document.getElementById('new-exercise-desc').value = '';
+            selectedEmoji = '🏋️';
+            document.querySelectorAll('#emoji-selector .filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.textContent === '🏋️') chip.classList.add('active');
+            });
+            closeModal('modal-quick-workout');
+            document.getElementById('modal-add-exercise').classList.add('active');
+        }
+
+        function selectEmoji(emoji) {
+            selectedEmoji = emoji;
+            document.querySelectorAll('#emoji-selector .filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.textContent === emoji) chip.classList.add('active');
+            });
+        }
+
+        function saveCustomExercise() {
+            const name = document.getElementById('new-exercise-name').value.trim();
+            const muscle = document.getElementById('new-exercise-muscle').value;
+            const desc = document.getElementById('new-exercise-desc').value.trim();
+
+            if (!name) {
+                showToast('请输入动作名称');
+                return;
+            }
+
+            const exercise = {
+                id: 'custom-' + Date.now(),
+                name: name,
+                emoji: selectedEmoji,
+                muscle: muscle,
+                description: desc,
+                isCustom: true
+            };
+
+            customExercises.push(exercise);
+            exercises = [...defaultExercises, ...customExercises];
+            localStorage.setItem('customExercises', JSON.stringify(customExercises));
+
+            closeModal('modal-add-exercise');
+            renderExerciseGrid();
+            renderCustomExercises();
+            showToast('✅ 自定义动作已添加');
+        }
+
+        function renderCustomExercises() {
+            const container = document.getElementById('custom-exercise-list');
+            
+            if (customExercises.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">➕</div>
+                        <h3>还没有自定义动作</h3>
+                        <p style="margin-top: 8px;">点击下方按钮创建</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = customExercises.map(ex => `
+                <div class="plan-card" onclick="selectCustomExercise('${ex.id}')">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="plan-name">${ex.emoji} ${ex.name}</div>
+                            <div style="font-size: 12px; color: var(--text-light); margin-top: 4px;">
+                                ${getMuscleLabel(ex.muscle)}${ex.description ? ' · ' + ex.description : ''}
+                            </div>
+                        </div>
+                        <button class="icon-btn" onclick="event.stopPropagation(); deleteCustomExercise('${ex.id}')" style="color: var(--accent);">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectCustomExercise(exerciseId) {
+            selectExercise(exerciseId);
+            closeModal('modal-quick-workout');
+        }
+
+        function deleteCustomExercise(exerciseId) {
+            if (confirm('确定要删除这个自定义动作吗？')) {
+                customExercises = customExercises.filter(e => e.id !== exerciseId);
+                exercises = [...defaultExercises, ...customExercises];
+                localStorage.setItem('customExercises', JSON.stringify(customExercises));
+                renderExerciseGrid();
+                renderCustomExercises();
+                showToast('已删除');
+            }
+        }
+
+        function getMuscleLabel(muscle) {
+            const labels = {
+                'chest': '胸部',
+                'back': '背部',
+                'legs': '腿部',
+                'shoulders': '肩部',
+                'arms': '手臂',
+                'core': '核心'
+            };
+            return labels[muscle] || '其他';
         }
 
         function selectExercise(exerciseId) {
