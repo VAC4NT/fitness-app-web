@@ -434,6 +434,8 @@
             border-radius: 24px 24px 0 0;
             overflow: hidden;
             animation: slideUp 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         @keyframes slideUp {
@@ -1042,7 +1044,7 @@
                 <h3>📋 创建训练计划</h3>
                 <button class="modal-close" onclick="closeModal('modal-create-plan')">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
                 <div class="form-group">
                     <label>计划名称</label>
                     <input type="text" id="plan-name" placeholder="例如：胸背日、推日...">
@@ -1060,11 +1062,11 @@
                 </div>
                 <div class="form-group">
                     <label>添加动作</label>
-                    <div id="plan-exercise-list"></div>
+                    <div id="plan-exercise-list" style="max-height: 200px; overflow-y: auto; padding-right: 4px;"></div>
                     <button class="add-set-btn" onclick="addPlanExercise()" style="margin-top: 12px;">+ 添加动作</button>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="flex-shrink: 0;">
                 <button class="btn btn-outline" style="flex: 1; color: var(--text-light);" onclick="closeModal('modal-create-plan')">取消</button>
                 <button class="btn btn-primary" style="flex: 2;" onclick="savePlan()">✅ 保存计划</button>
             </div>
