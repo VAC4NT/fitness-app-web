@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2D7AF6">
+    <title>健身记录</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2D7AF6;
+            --primary-light: #4A90E2;
+            --secondary: #00C897;
+            --secondary-dark: #00B87A;
+            --accent: #FF6B6B;
+            --accent-orange: #FF9500;
+            --accent-purple: #8B5CF6;
+            --bg: #F5F7FA;
+            --card: #FFFFFF;
+            --text: #1A1A2E;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 24px 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .header-btn:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* 欢迎卡片 */
+        .welcome-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            margin: 16px;
+            border-radius: 20px;
+            padding: 24px;
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-card h2 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .welcome-card p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        /* 快捷入口 */
+        .quick-access {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            margin: 16px;
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .quick-access h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+
+        .quick-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .quick-stat {
+            text-align: center;
+        }
+
+        .quick-stat .value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .quick-stat .label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary {
+            background: white;
+            color: var(--secondary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid currentColor;
+        }
+
+        .btn-full { width: 100%; }
+
+        /* 区块 */
+        .section {
+            margin: 24px 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title a {
+            font-size: 14px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* 训练计划卡片 */
+        .plan-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .plan-card:active {
+            transform: scale(0.99);
+        }
+
+        .plan-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(45, 122, 246, 0.05), rgba(74, 144, 226, 0.1));
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .plan-name {
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .plan-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .badge-chest { background: #FEE2E2; color: #DC2626; }
+        .badge-back { background: #DBEAFE; color: #2563EB; }
+        .badge-legs { background: #D1FAE5; color: #059669; }
+        .badge-push { background: #FEF3C7; color: #D97706; }
+        .badge-pull { background: #E0E7FF; color: #4F46E5; }
+        .badge-full { background: #F3E8FF; color: #7C3AED; }
+
+        .plan-exercises {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .exercise-tag {
+            background: var(--bg);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .plan-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        /* 训练记录卡片 */
+        .workout-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .workout-card .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .workout-card .name {
+            font-weight: 700;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .workout-card .date {
+            color: var(--text-light);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .workout-card .stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .weight-badge {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--secondary);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.8;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 500;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(45, 122, 246, 0.1);
+        }
+
+        .nav-item span {
+            font-size: 22px;
+        }
+
+        /* 浮动按钮 */
+        .fab {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            font-size: 28px;
+            box-shadow: 0 6px 24px rgba(45, 122, 246, 0.4);
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: flex-end;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            border-radius: 24px 24px 0 0;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: var(--bg);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(90vh - 80px);
+        }
+
+        .modal-footer {
+            padding: 16px 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 表单 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* 动作网格 */
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .exercise-item {
+            background: var(--bg);
+            padding: 14px 10px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .exercise-item:hover, .exercise-item.selected {
+            border-color: var(--primary);
+            background: rgba(45, 122, 246, 0.1);
+        }
+
+        .exercise-item .emoji {
+            font-size: 26px;
+            display: block;
+        }
+
+        .exercise-item .name {
+            font-size: 11px;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* 组数输入 */
+        .set-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 14px;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .set-row .set-num {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .set-row.warmup .set-num {
+            background: var(--accent-orange);
+        }
+
+        .set-row input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 15px;
+            min-width: 0;
+        }
+
+        .set-row input:focus {
+            border-color: var(--primary);
+        }
+
+        .set-row .unit {
+            font-size: 12px;
+            color: var(--text-light);
+            width: 24px;
+            font-weight: 500;
+        }
+
+        .set-row .delete-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .add-set-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--bg);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+
+        .add-set-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* 图表 */
+        .chart-container {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 140px;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--primary), var(--primary-light));
+            border-radius: 8px 8px 0 0;
+            min-height: 10px;
+            position: relative;
+            transition: height 0.3s ease;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* 统计卡片 */
+        .stat-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        /* 计时器 */
+        .timer-display {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .timer-display .time {
+            font-size: 72px;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            color: var(--primary);
+        }
+
+        .timer-display .status {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+
+        .timer-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--card);
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 训练进度 */
+        .progress-bar {
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* 响应式 */
+        @media (min-width: 768px) {
+            body {
+                max-width: 480px;
+                margin: 0 auto;
+                box-shadow: 0 0 40px rgba(0,0,0,0.1);
+                min-height: 100vh;
+            }
+        }
+
+        /* 动画 */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* 深色模式 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0F172A;
+                --card: #1E293B;
+                --text: #F8FAFC;
+                --text-light: #94A3B8;
+                --border: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部 -->
+    <div class="header">
+        <div class="header-content">
+            <h1>🏋️ 健身记录</h1>
+            <div class="header-actions">
+                <button class="header-btn" onclick="openTimerModal()">⏱️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主页 -->
+    <div id="page-home">
+        <div class="welcome-card">
+            <h2 id="greeting">早上好！💪</h2>
+            <p id="weekly-summary">本周已运动 0 次，共 0 分钟</p>
+            <div class="stats-row">
+                <div class="stat-chip">🔥 0 千卡</div>
+                <div class="stat-chip">📍 0 km</div>
+            </div>
+        </div>
+
+        <!-- 健身房快捷入口 -->
+        <div class="quick-access">
+            <h3><span>🏋️</span> 健身房训练</h3>
+            <div class="quick-stats">
+                <div class="quick-stat">
+                    <div class="value" id="gym-count">0</div>
+                    <div class="label">次训练</div>
+                </div>
+                <div class="quick-stat">
+                    <div class="value" id="gym-sets">0</div>
+                    <div class="label">组</div>
+                </div>
+                <div class="quick-stat">
+                    <div class="value" id="gym-weight">0</div>
+                    <div class="label">kg</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="openQuickWorkoutModal()" style="flex: 1;">
+                    ▶️ 快速开始
+                </button>
+                <button class="btn btn-primary" onclick="showPage('plans')" style="flex: 1;">
+                    📋 训练计划
+                </button>
+            </div>
+        </div>
+
+        <!-- 最近训练 -->
+        <div class="section">
+            <div class="section-title">
+                <span>最近训练</span>
+                <a href="#" onclick="showPage('history')">查看全部</a>
+            </div>
+            <div id="recent-workouts">
+                <div class="empty-state">
+                    <div class="icon">🏋️</div>
+                    <h3>开始你的第一次训练</h3>
+                    <p style="margin-top: 8px;">点击上方按钮开始记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 训练计划页面 -->
+    <div id="page-plans" style="display: none;">
+        <div class="section">
+            <div class="section-title">
+                <span>我的训练计划</span>
+                <a href="#" onclick="openCreatePlanModal()">+ 新建计划</a>
+            </div>
+            <div id="plans-list">
+                <!-- 预设计划 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史页面 -->
+    <div id="page-history" style="display: none;">
+        <div class="section">
+            <div class="section-title">训练历史</div>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <!-- 统计页面 -->
+    <div id="page-stats" style="display: none;">
+        <div class="section">
+            <div class="section-title">本周统计</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="value" id="stat-workouts">0</div>
+                    <div class="label">训练次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="stat-sets">0</div>
+                    <div class="label">总组数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="stat-weight">0</div>
+                    <div class="label">总重量</div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="chart-container">
+                <div class="chart-title">📊 本周训练容量</div>
+                <div class="bar-chart" id="volume-chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置页面 -->
+    <div id="page-settings" style="display: none;">
+        <div class="section">
+            <div class="section-title">设置</div>
+            <div class="workout-card" onclick="exportData()">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 24px;">📤</span>
+                    <div>
+                        <div style="font-weight: 600;">导出数据</div>
+                        <div style="font-size: 12px; color: var(--text-light);">备份训练记录</div>
+                    </div>
+                </div>
+            </div>
+            <div class="workout-card" onclick="importData()">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 24px;">📥</span>
+                    <div>
+                        <div style="font-weight: 600;">导入数据</div>
+                        <div style="font-size: 12px; color: var(--text-light);">恢复训练记录</div>
+                    </div>
+                </div>
+            </div>
+            <div class="workout-card" onclick="clearAllData()">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 24px;">🗑️</span>
+                    <div>
+                        <div style="font-weight: 600;">清除所有数据</div>
+                        <div style="font-size: 12px; color: var(--text-light);">删除所有记录和计划</div>
+                    </div>
+                </div>
+            </div>
+            <div class="workout-card">
+                <div style="text-align: center; color: var(--text-light); font-size: 12px; padding: 16px;">
+                    健身记录 App v2.0<br>
+                    Made with ❤️ by 小爪
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 浮动按钮 -->
+    <button class="fab" onclick="openQuickWorkoutModal()">+</button>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-item active" data-page="home" onclick="showPage('home')">
+            <span>🏠</span>
+            首页
+        </a>
+        <a href="#" class="nav-item" data-page="plans" onclick="showPage('plans')">
+            <span>📋</span>
+            计划
+        </a>
+        <a href="#" class="nav-item" data-page="history" onclick="showPage('history')">
+            <span>📜</span>
+            记录
+        </a>
+        <a href="#" class="nav-item" data-page="stats" onclick="showPage('stats')">
+            <span>📊</span>
+            统计
+        </a>
+        <a href="#" class="nav-item" data-page="settings" onclick="showPage('settings')">
+            <span>⚙️</span>
+            设置
+        </a>
+    </div>
+
+    <!-- 快速训练模态框 -->
+    <div class="modal-overlay" id="modal-quick-workout">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>🏋️ 快速训练</h3>
+                <button class="modal-close" onclick="closeModal('modal-quick-workout')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchQuickTab('exercise')">自由训练</div>
+                    <div class="tab" onclick="switchQuickTab('plan')">使用计划</div>
+                </div>
+                
+                <!-- 自由训练 -->
+                <div id="quick-tab-exercise">
+                    <div class="form-group">
+                        <label>选择动作</label>
+                        <div class="exercise-grid" id="exercise-grid"></div>
+                    </div>
+                </div>
+                
+                <!-- 使用计划 -->
+                <div id="quick-tab-plan" style="display: none;">
+                    <div id="plan-select-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 组数输入模态框 -->
+    <div class="modal-overlay" id="modal-sets">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="selected-exercise-name"></h3>
+                <button class="modal-close" onclick="closeModal('modal-sets')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="sets-container"></div>
+                <button class="add-set-btn" onclick="addSet()">+ 添加一组</button>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>备注</label>
+                    <input type="text" id="workout-notes" placeholder="训练感受...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" style="flex: 1; color: var(--text-light);" onclick="closeModal('modal-sets')">取消</button>
+                <button class="btn btn-accent" style="flex: 2;" onclick="saveWorkout()">✅ 保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 训练计划执行模态框 -->
+    <div class="modal-overlay" id="modal-plan-workout">
+        <div class="modal" style="max-height: 95vh;">
+            <div class="modal-header">
+                <h3 id="plan-workout-title">训练中</h3>
+                <button class="modal-close" onclick="confirmEndWorkout()">&times;</button>
+            </div>
+            <div class="modal-body" id="plan-workout-body">
+                <!-- 动态生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-accent btn-full" onclick="finishPlanWorkout()">🎉 完成训练</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建计划模态框 -->
+    <div class="modal-overlay" id="modal-create-plan">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📋 创建训练计划</h3>
+                <button class="modal-close" onclick="closeModal('modal-create-plan')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>计划名称</label>
+                    <input type="text" id="plan-name" placeholder="例如：胸背日、推日...">
+                </div>
+                <div class="form-group">
+                    <label>计划类型</label>
+                    <select id="plan-type">
+                        <option value="push">推日 (胸/肩/三头)</option>
+                        <option value="pull">拉日 (背/二头)</option>
+                        <option value="legs">腿部日</option>
+                        <option value="chest">胸部专项</option>
+                        <option value="back">背部专项</option>
+                        <option value="full">全身训练</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>添加动作</label>
+                    <div id="plan-exercise-list"></div>
+                    <button class="add-set-btn" onclick="addPlanExercise()" style="margin-top: 12px;">+ 添加动作</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" style="flex: 1; color: var(--text-light);" onclick="closeModal('modal-create-plan')">取消</button>
+                <button class="btn btn-primary" style="flex: 2;" onclick="savePlan()">✅ 保存计划</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 计时器模态框 -->
+    <div class="modal-overlay" id="modal-timer">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>⏱️ 休息计时器</h3>
+                <button class="modal-close" onclick="closeModal('modal-timer')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="timer-display">
+                    <div class="time" id="timer-display">01:30</div>
+                    <div class="status" id="timer-status">准备开始</div>
+                </div>
+                <div class="form-group">
+                    <label>设置时间（秒）</label>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline" style="flex: 1;" onclick="setTimer(30)">30秒</button>
+                        <button class="btn btn-outline" style="flex: 1;" onclick="setTimer(60)">1分钟</button>
+                        <button class="btn btn-outline" style="flex: 1; color: var(--primary);" onclick="setTimer(90)">1.5分钟</button>
+                        <button class="btn btn-outline" style="flex: 1;" onclick="setTimer(120)">2分钟</button>
+                    </div>
+                </div>
+                <div class="timer-buttons">
+                    <button class="btn btn-primary" onclick="startTimer()">▶️ 开始</button>
+                    <button class="btn btn-outline" onclick="resetTimer()">🔄 重置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的文件输入 -->
+    <input type="file" id="import-input" accept=".json" style="display: none;" onchange="handleImport(event)">
+
+    <script>
+        // ========== 数据 ==========
+        const exercises = [
+            { id: 'benchPress', name: '卧推', emoji: '🏋️', muscle: 'chest' },
+            { id: 'inclinePress', name: '上斜卧推', emoji: '🏋️', muscle: 'chest' },
+            { id: 'dumbbellFly', name: '哑铃飞鸟', emoji: '🦅', muscle: 'chest' },
+            { id: 'cableCross', name: '钢线交叉', emoji: '🏋️', muscle: 'chest' },
+            { id: 'deadlift', name: '硬拉', emoji: '🏋️', muscle: 'back' },
+            { id: 'latPulldown', name: '高位下拉', emoji: '🏋️', muscle: 'back' },
+            { id: 'barbellRow', name: '杠铃划船', emoji: '🏋️', muscle: 'back' },
+            { id: 'pullUp', name: '引体向上', emoji: '💪', muscle: 'back' },
+            { id: 'seatedRow', name: '坐姿划船', emoji: '🏋️', muscle: 'back' },
+            { id: 'squat', name: '深蹲', emoji: '🦵', muscle: 'legs' },
+            { id: 'legPress', name: '腿举', emoji: '🦵', muscle: 'legs' },
+            { id: 'legExtension', name: '腿屈伸', emoji: '🦵', muscle: 'legs' },
+            { id: 'legCurl', name: '腿弯举', emoji: '🦵', muscle: 'legs' },
+            { id: 'calfRaise', name: '提踵', emoji: '🦵', muscle: 'legs' },
+            { id: 'overheadPress', name: '肩推', emoji: '🏋️', muscle: 'shoulders' },
+            { id: 'lateralRaise', name: '侧平举', emoji: '💪', muscle: 'shoulders' },
+            { id: 'facePull', name: '面拉', emoji: '🏋️', muscle: 'shoulders' },
+            { id: 'bicepCurl', name: '二头弯举', emoji: '💪', muscle: 'arms' },
+            { id: 'hammerCurl', name: '锤式弯举', emoji: '💪', muscle: 'arms' },
+            { id: 'tricepPushdown', name: '三头下压', emoji: '💪', muscle: 'arms' },
+            { id: 'skullCrusher', name: '仰卧臂屈伸', emoji: '💪', muscle: 'arms' },
+            { id: 'plank', name: '平板支撑', emoji: '🧘', muscle: 'core' },
+            { id: 'crunch', name: '卷腹', emoji: '🧘', muscle: 'core' },
+            { id: 'legRaise', name: '悬垂举腿', emoji: '🧘', muscle: 'core' },
+        ];
+
+        // 存储
+        let workouts = JSON.parse(localStorage.getItem('workouts') || '[]');
+        let plans = JSON.parse(localStorage.getItem('plans') || '[]');
+        let selectedExercise = null;
+        let currentSets = [];
+        let currentPlanWorkout = null;
+        let currentPlanExerciseIndex = 0;
+
+        // 计时器
+        let timerInterval = null;
+        let timerSeconds = 90;
+        let timerRemaining = 90;
+
+        // ========== 初始化 ==========
+        function init() {
+            renderExerciseGrid();
+            initDefaultPlans();
+            renderPlans();
+            updateUI();
+            updateGreeting();
+        }
+
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const greeting = document.getElementById('greeting');
+            if (hour < 12) greeting.textContent = '早上好！💪';
+            else if (hour < 18) greeting.textContent = '下午好！🔥';
+            else greeting.textContent = '晚上好！🌙';
+        }
+
+        // ========== 预设计划 ==========
+        function initDefaultPlans() {
+            if (plans.length === 0) {
+                plans = [
+                    {
+                        id: 'default-push',
+                        name: '推日',
+                        type: 'push',
+                        isDefault: true,
+                        exercises: [
+                            { exerciseId: 'benchPress', sets: 4, reps: 8 },
+                            { exerciseId: 'inclinePress', sets: 3, reps: 10 },
+                            { exerciseId: 'overheadPress', sets: 4, reps: 8 },
+                            { exerciseId: 'lateralRaise', sets: 3, reps: 12 },
+                            { exerciseId: 'tricepPushdown', sets: 3, reps: 12 }
+                        ]
+                    },
+                    {
+                        id: 'default-pull',
+                        name: '拉日',
+                        type: 'pull',
+                        isDefault: true,
+                        exercises: [
+                            { exerciseId: 'deadlift', sets: 4, reps: 5 },
+                            { exerciseId: 'latPulldown', sets: 4, reps: 10 },
+                            { exerciseId: 'barbellRow', sets: 4, reps: 8 },
+                            { exerciseId: 'facePull', sets: 3, reps: 15 },
+                            { exerciseId: 'bicepCurl', sets: 3, reps: 12 }
+                        ]
+                    },
+                    {
+                        id: 'default-legs',
+                        name: '腿部日',
+                        type: 'legs',
+                        isDefault: true,
+                        exercises: [
+                            { exerciseId: 'squat', sets: 5, reps: 5 },
+                            { exerciseId: 'legPress', sets: 4, reps: 10 },
+                            { exerciseId: 'legExtension', sets: 3, reps: 12 },
+                            { exerciseId: 'legCurl', sets: 3, reps: 12 },
+                            { exerciseId: 'calfRaise', sets: 4, reps: 15 }
+                        ]
+                    }
+                ];
+                localStorage.setItem('plans', JSON.stringify(plans));
+            }
+        }
+
+        // ========== 渲染 ==========
+        function renderExerciseGrid() {
+            const grid = document.getElementById('exercise-grid');
+            grid.innerHTML = exercises.map(ex => `
+                <div class="exercise-item" onclick="selectExercise('${ex.id}')">
+                    <span class="emoji">${ex.emoji}</span>
+                    <span class="name">${ex.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderPlans() {
+            const list = document.getElementById('plans-list');
+            const selectList = document.getElementById('plan-select-list');
+            
+            const html = plans.map(plan => {
+                const typeBadge = {
+                    'push': { class: 'badge-push', text: '推日' },
+                    'pull': { class: 'badge-pull', text: '拉日' },
+                    'legs': { class: 'badge-legs', text: '腿部' },
+                    'chest': { class: 'badge-chest', text: '胸部' },
+                    'back': { class: 'badge-back', text: '背部' },
+                    'full': { class: 'badge-full', text: '全身' }
+                }[plan.type] || { class: 'badge-full', text: '自定义' };
+
+                const exerciseTags = plan.exercises.map(e => {
+                    const ex = exercises.find(x => x.id === e.exerciseId);
+                    return ex ? `<span class="exercise-tag">${ex.emoji} ${ex.name}</span>` : '';
+                }).join('');
+
+                const totalSets = plan.exercises.reduce((sum, e) => sum + e.sets, 0);
+
+                return `
+                    <div class="plan-card" onclick="startPlanWorkout('${plan.id}')">
+                        <div class="plan-header">
+                            <div class="plan-name">📋 ${plan.name}</div>
+                            <span class="plan-badge ${typeBadge.class}">${typeBadge.text}</span>
+                        </div>
+                        <div class="plan-exercises">${exerciseTags}</div>
+                        <div class="plan-footer">
+                            <span>${plan.exercises.length} 个动作 · ${totalSets} 组</span>
+                            <span>▶️ 开始</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            list.innerHTML = html || '<div class="empty-state"><div class="icon">📋</div><h3>还没有训练计划</h3><p>点击右上角创建</p></div>';
+            
+            // 计划选择列表（用于快速训练）
+            if (selectList) {
+                selectList.innerHTML = plans.map(plan => `
+                    <div class="plan-card" onclick="startPlanWorkout('${plan.id}'); closeModal('modal-quick-workout');">
+                        <div class="plan-header">
+                            <div class="plan-name">📋 ${plan.name}</div>
+                        </div>
+                        <div class="plan-exercises">
+                            ${plan.exercises.slice(0, 3).map(e => {
+                                const ex = exercises.find(x => x.id === e.exerciseId);
+                                return ex ? `<span class="exercise-tag">${ex.emoji} ${ex.name}</span>` : '';
+                            }).join('')}
+                            ${plan.exercises.length > 3 ? `<span class="exercise-tag">+${plan.exercises.length - 3}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('') || '<div class="empty-state"><p>还没有训练计划</p></div>';
+            }
+        }
+
+        // ========== 快速训练 ==========
+        function openQuickWorkoutModal() {
+            document.getElementById('modal-quick-workout').classList.add('active');
+            switchQuickTab('exercise');
+        }
+
+        function switchQuickTab(tab) {
+            document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('quick-tab-exercise').style.display = tab === 'exercise' ? 'block' : 'none';
+            document.getElementById('quick-tab-plan').style.display = tab === 'plan' ? 'block' : 'none';
+        }
+
+        function selectExercise(exerciseId) {
+            selectedExercise = exercises.find(ex => ex.id === exerciseId);
+            document.getElementById('selected-exercise-name').textContent = 
+                selectedExercise.emoji + ' ' + selectedExercise.name;
+            
+            currentSets = [
+                { weight: '', reps: '', isWarmup: false },
+                { weight: '', reps: '', isWarmup: false }
+            ];
+            renderSets();
+            
+            closeModal('modal-quick-workout');
+            document.getElementById('modal-sets').classList.add('active');
+        }
+
+        function renderSets() {
+            const container = document.getElementById('sets-container');
+            container.innerHTML = currentSets.map((set, index) => `
+                <div class="set-row ${set.isWarmup ? 'warmup' : ''}">
+                    <div class="set-num">${index + 1}</div>
+                    <input type="number" placeholder="重量" value="${set.weight}" 
+                           onchange="currentSets[${index}].weight = this.value">
+                    <span class="unit">kg</span>
+                    <input type="number" placeholder="次数" value="${set.reps}"
+                           onchange="currentSets[${index}].reps = this.value">
+                    <span class="unit">次</span>
+                    <label style="font-size: 11px; white-space: nowrap;">
+                        <input type="checkbox" ${set.isWarmup ? 'checked' : ''} 
+                               onchange="currentSets[${index}].isWarmup = this.checked"
+                               style="margin-right: 4px;">热身
+                    </label>
+                    ${currentSets.length > 1 ? `<button class="delete-btn" onclick="removeSet(${index})">×</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function addSet() {
+            currentSets.push({ weight: '', reps: '', isWarmup: false });
+            renderSets();
+        }
+
+        function removeSet(index) {
+            currentSets.splice(index, 1);
+            renderSets();
+        }
+
+        function saveWorkout() {
+            const validSets = currentSets.filter(s => s.weight && s.reps);
+            if (validSets.length === 0) {
+                alert('请至少填写一组数据');
+                return;
+            }
+
+            const workout = {
+                id: Date.now(),
+                exercise: selectedExercise,
+                sets: validSets.map((s, i) => ({
+                    ...s,
+                    weight: parseFloat(s.weight),
+                    reps: parseInt(s.reps),
+                    totalWeight: parseFloat(s.weight) * parseInt(s.reps)
+                })),
+                date: new Date().toISOString(),
+                notes: document.getElementById('workout-notes').value,
+                isPlanWorkout: false
+            };
+
+            workout.totalWeight = workout.sets.reduce((sum, s) => sum + s.totalWeight, 0);
+
+            workouts.unshift(workout);
+            localStorage.setItem('workouts', JSON.stringify(workouts));
+
+            closeModal('modal-sets');
+            updateUI();
+            resetWorkoutForm();
+
+            showToast('✅ 训练已保存！');
+        }
+
+        function resetWorkoutForm() {
+            selectedExercise = null;
+            currentSets = [];
+            document.getElementById('workout-notes').value = '';
+        }
+
+        // ========== 训练计划执行 ==========
+        function startPlanWorkout(planId) {
+            const plan = plans.find(p => p.id === planId);
+            if (!plan) return;
+
+            currentPlanWorkout = {
+                plan: plan,
+                startTime: new Date().toISOString(),
+                exercises: plan.exercises.map(e => ({
+                    ...e,
+                    exercise: exercises.find(x => x.id === e.exerciseId),
+                    completedSets: [],
+                    inputWeight: '',
+                    inputReps: ''
+                }))
+            };
+            currentPlanExerciseIndex = 0;
+
+            renderPlanWorkout();
+            closeModal('modal-quick-workout');
+            document.getElementById('modal-plan-workout').classList.add('active');
+        }
+
+        function renderPlanWorkout() {
+            const container = document.getElementById('plan-workout-body');
+            const title = document.getElementById('plan-workout-title');
+            
+            title.textContent = `📋 ${currentPlanWorkout.plan.name}`;
+            
+            // 进度
+            const totalExercises = currentPlanWorkout.exercises.length;
+            const completedExercises = currentPlanWorkout.exercises.filter(e => e.completedSets.length >= e.sets).length;
+            const progress = (completedExercises / totalExercises) * 100;
+
+            let html = `
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-weight: 600;">进度</span>
+                        <span style="color: var(--text-light);">${completedExercises}/${totalExercises}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+            `;
+
+            // 当前动作
+            const current = currentPlanWorkout.exercises[currentPlanExerciseIndex];
+            if (current && current.exercise) {
+                const remainingSets = current.sets - current.completedSets.length;
+                
+                html += `
+                    <div style="background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
+                                border-radius: 16px; padding: 20px; color: white; margin-bottom: 20px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">${current.exercise.emoji}</div>
+                        <div style="font-size: 20px; font-weight: 700;">${current.exercise.name}</div>
+                        <div style="opacity: 0.8; margin-top: 4px;">目标: ${current.sets}组 × ${current.reps}次</div>
+                        <div style="margin-top: 12px; font-size: 14px;">
+                            已完成: ${current.completedSets.length}/${current.sets} 组
+                        </div>
+                    </div>
+                `;
+
+                if (remainingSets > 0) {
+                    html += `
+                        <div class="form-group">
+                            <label>记录本组</label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="number" placeholder="重量" id="plan-weight" value="${current.inputWeight}"
+                                       style="flex: 1;" onchange="current.inputWeight = this.value">
+                                <span style="align-self: center;">kg</span>
+                                <input type="number" placeholder="次数" id="plan-reps" value="${current.inputReps}"
+                                       style="flex: 1;" onchange="current.inputReps = this.value">
+                                <span style="align-self: center;">次</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-accent btn-full" onclick="completePlanSet()">✓ 完成本组</button>
+                    `;
+                }
+
+                // 已完成的组
+                if (current.completedSets.length > 0) {
+                    html += `
+                        <div style="margin-top: 16px;">
+                            <div style="font-size: 13px; color: var(--text-light); margin-bottom: 8px;">已完成</div>
+                            ${current.completedSets.map((s, i) => `
+                                <div style="display: flex; gap: 12px; padding: 8px; background: var(--bg); 
+                                            border-radius: 8px; margin-bottom: 6px; font-size: 14px;">
+                                    <span style="font-weight: 600;">第${i + 1}组</span>
+                                    <span>${s.weight}kg × ${s.reps}次</span>
+                                    <span style="color: var(--text-light);">= ${s.weight * s.reps}kg</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            }
+
+            // 导航按钮
+            html += `
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="btn btn-outline" style="flex: 1; color: var(--text-light);" 
+                            onclick="prevPlanExercise()" ${currentPlanExerciseIndex === 0 ? 'disabled' : ''}>
+                        ← 上一个
+                    </button>
+                    <button class="btn btn-outline" style="flex: 1; color: var(--primary);" 
+                            onclick="nextPlanExercise()" ${currentPlanExerciseIndex >= totalExercises - 1 ? 'disabled' : ''}>
+                        下一个 →
+                    </button>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function completePlanSet() {
+            const current = currentPlanWorkout.exercises[currentPlanExerciseIndex];
+            const weight = parseFloat(document.getElementById('plan-weight').value) || 0;
+            const reps = parseInt(document.getElementById('plan-reps').value) || 0;
+
+            if (!weight || !reps) {
+                showToast('请输入重量和次数');
+                return;
+            }
+
+            current.completedSets.push({ weight, reps });
+            current.inputWeight = '';
+            current.inputReps = '';
+
+            // 检查是否完成当前动作
+            if (current.completedSets.length >= current.sets) {
+                // 自动跳到下一个
+                if (currentPlanExerciseIndex < currentPlanWorkout.exercises.length - 1) {
+                    currentPlanExerciseIndex++;
+                    showToast('✅ ' + current.exercise.name + ' 完成！');
+                }
+            }
+
+            renderPlanWorkout();
+        }
+
+        function prevPlanExercise() {
+            if (currentPlanExerciseIndex > 0) {
+                currentPlanExerciseIndex--;
+                renderPlanWorkout();
+            }
+        }
+
+        function nextPlanExercise() {
+            if (currentPlanExerciseIndex < currentPlanWorkout.exercises.length - 1) {
+                currentPlanExerciseIndex++;
+                renderPlanWorkout();
+            }
+        }
+
+        function confirmEndWorkout() {
+            if (confirm('确定要结束训练吗？未完成的动作不会被记录。')) {
+                finishPlanWorkout();
+            }
+        }
+
+        function finishPlanWorkout() {
+            // 保存每个完成的动作
+            const completedExercises = currentPlanWorkout.exercises.filter(e => e.completedSets.length > 0);
+            
+            completedExercises.forEach(e => {
+                const workout = {
+                    id: Date.now() + Math.random(),
+                    exercise: e.exercise,
+                    sets: e.completedSets.map((s, i) => ({
+                        weight: s.weight,
+                        reps: s.reps,
+                        totalWeight: s.weight * s.reps,
+                        isWarmup: false
+                    })),
+                    date: new Date().toISOString(),
+                    planName: currentPlanWorkout.plan.name,
+                    isPlanWorkout: true
+                };
+                workout.totalWeight = workout.sets.reduce((sum, s) => sum + s.totalWeight, 0);
+                workouts.unshift(workout);
+            });
+
+            localStorage.setItem('workouts', JSON.stringify(workouts));
+            
+            closeModal('modal-plan-workout');
+            currentPlanWorkout = null;
+            currentPlanExerciseIndex = 0;
+            updateUI();
+
+            showToast('🎉 训练完成！共记录 ' + completedExercises.length + ' 个动作');
+        }
+
+        // ========== 创建计划 ==========
+        let newPlanExercises = [];
+
+        function openCreatePlanModal() {
+            newPlanExercises = [];
+            renderPlanExerciseList();
+            document.getElementById('modal-create-plan').classList.add('active');
+        }
+
+        function renderPlanExerciseList() {
+            const container = document.getElementById('plan-exercise-list');
+            
+            let html = newPlanExercises.map((item, index) => {
+                const ex = exercises.find(e => e.id === item.exerciseId);
+                return `
+                    <div class="set-row">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 8px;">
+                                ${ex ? ex.emoji + ' ' + ex.name : '选择动作'}
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <select onchange="newPlanExercises[${index}].exerciseId = this.value"
+                                        style="flex: 2; padding: 8px; border-radius: 8px; border: 1px solid var(--border);">
+                                    <option value="">选择动作</option>
+                                    ${exercises.map(e => `
+                                        <option value="${e.id}" ${item.exerciseId === e.id ? 'selected' : ''}>
+                                            ${e.emoji} ${e.name}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                                <input type="number" placeholder="组数" value="${item.sets}" 
+                                       style="width: 60px; padding: 8px; border-radius: 8px; border: 1px solid var(--border);"
+                                       onchange="newPlanExercises[${index}].sets = parseInt(this.value)">
+                                <input type="number" placeholder="次数" value="${item.reps}"
+                                       style="width: 60px; padding: 8px; border-radius: 8px; border: 1px solid var(--border);"
+                                       onchange="newPlanExercises[${index}].reps = parseInt(this.value)">
+                            </div>
+                        </div>
+                        <button class="delete-btn" onclick="removePlanExercise(${index})">×</button>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html || '<p style="color: var(--text-light); text-align: center; padding: 20px;">点击下方添加动作</p>';
+        }
+
+        function addPlanExercise() {
+            newPlanExercises.push({ exerciseId: '', sets: 3, reps: 10 });
+            renderPlanExerciseList();
+        }
+
+        function removePlanExercise(index) {
+            newPlanExercises.splice(index, 1);
+            renderPlanExerciseList();
+        }
+
+        function savePlan() {
+            const name = document.getElementById('plan-name').value.trim();
+            const type = document.getElementById('plan-type').value;
+
+            if (!name) {
+                showToast('请输入计划名称');
+                return;
+            }
+
+            const validExercises = newPlanExercises.filter(e => e.exerciseId && e.sets && e.reps);
+            if (validExercises.length === 0) {
+                showToast('请至少添加一个动作');
+                return;
+            }
+
+            const plan = {
+                id: 'plan-' + Date.now(),
+                name: name,
+                type: type,
+                exercises: validExercises,
+                isDefault: false
+            };
+
+            plans.push(plan);
+            localStorage.setItem('plans', JSON.stringify(plans));
+
+            closeModal('modal-create-plan');
+            document.getElementById('plan-name').value = '';
+            newPlanExercises = [];
+            renderPlans();
+
+            showToast('✅ 训练计划已保存！');
+        }
+
+        // ========== 计时器 ==========
+        function openTimerModal() {
+            document.getElementById('modal-timer').classList.add('active');
+            updateTimerDisplay();
+        }
+
+        function setTimer(seconds) {
+            timerSeconds = seconds;
+            timerRemaining = seconds;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerRemaining / 60);
+            const seconds = timerRemaining % 60;
+            document.getElementById('timer-display').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                document.getElementById('timer-status').textContent = '已暂停';
+                return;
+            }
+
+            document.getElementById('timer-status').textContent = '计时中...';
+            
+            timerInterval = setInterval(() => {
+                timerRemaining--;
+                updateTimerDisplay();
+
+                if (timerRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    document.getElementById('timer-status').textContent = '⏰ 时间到！';
+                    
+                    // 震动提示
+                    if (navigator.vibrate) {
+                        navigator.vibrate([200, 100, 200]);
+                    }
+                    
+                    // 声音提示
+                    try {
+                        const audio = new AudioContext();
+                        const oscillator = audio.createOscillator();
+                        oscillator.connect(audio.destination);
+                        oscillator.frequency.value = 800;
+                        oscillator.start();
+                        setTimeout(() => oscillator.stop(), 200);
+                    } catch (e) {}
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerRemaining = timerSeconds;
+            updateTimerDisplay();
+            document.getElementById('timer-status').textContent = '准备开始';
+        }
+
+        // ========== UI 更新 ==========
+        function updateUI() {
+            const now = new Date();
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay() + 1);
+            weekStart.setHours(0, 0, 0, 0);
+
+            const weeklyWorkouts = workouts.filter(w => new Date(w.date) >= weekStart);
+            
+            const totalWorkouts = weeklyWorkouts.length;
+            const totalSets = weeklyWorkouts.reduce((sum, w) => sum + (w.sets?.length || 0), 0);
+            const totalWeight = weeklyWorkouts.reduce((sum, w) => sum + (w.totalWeight || 0), 0);
+
+            document.getElementById('gym-count').textContent = totalWorkouts;
+            document.getElementById('gym-sets').textContent = totalSets;
+            document.getElementById('gym-weight').textContent = Math.round(totalWeight);
+
+            document.getElementById('stat-workouts').textContent = totalWorkouts;
+            document.getElementById('stat-sets').textContent = totalSets;
+            document.getElementById('stat-weight').textContent = Math.round(totalWeight);
+
+            renderRecentWorkouts();
+            renderHistory();
+            renderChart();
+            renderPlans();
+        }
+
+        function renderRecentWorkouts() {
+            const container = document.getElementById('recent-workouts');
+            const recent = workouts.slice(0, 3);
+
+            if (recent.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🏋️</div>
+                        <h3>开始你的第一次训练</h3>
+                        <p style="margin-top: 8px;">点击上方按钮开始记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = recent.map(w => `
+                <div class="workout-card">
+                    <div class="header-row">
+                        <div>
+                            <div class="name">${w.exercise.emoji} ${w.exercise.name}</div>
+                            <div class="date">${formatDate(w.date)} ${w.planName ? '· ' + w.planName : ''}</div>
+                        </div>
+                        <div class="weight-badge">${Math.round(w.totalWeight)}kg</div>
+                    </div>
+                    <div class="stats">
+                        <span>📊 ${w.sets.length}组</span>
+                        <span>💪 最大${Math.max(...w.sets.map(s => s.weight))}kg</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            
+            if (workouts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📜</div>
+                        <h3>暂无训练记录</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            // 按日期分组
+            const grouped = {};
+            workouts.forEach(w => {
+                const dateKey = new Date(w.date).toLocaleDateString('zh-CN');
+                if (!grouped[dateKey]) grouped[dateKey] = [];
+                grouped[dateKey].push(w);
+            });
+
+            container.innerHTML = Object.entries(grouped).map(([date, items]) => `
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 14px; font-weight: 600; color: var(--text-light); margin-bottom: 12px; padding-left: 4px;">
+                        ${date}
+                    </div>
+                    ${items.map(w => `
+                        <div class="workout-card">
+                            <div class="header-row">
+                                <div>
+                                    <div class="name">${w.exercise.emoji} ${w.exercise.name}</div>
+                                    <div class="date">${formatTime(w.date)} ${w.planName ? '· ' + w.planName : ''}</div>
+                                </div>
+                                <button onclick="deleteWorkout(${w.id})" style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: 18px;">🗑️</button>
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-light); margin-bottom: 8px;">
+                                ${w.sets.map((s, i) => `${s.weight}kg×${s.reps}`).join(' · ')}
+                            </div>
+                            <div class="stats">
+                                <span>📊 ${w.sets.length}组</span>
+                                <span>💪 ${Math.round(w.totalWeight)}kg</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function renderChart() {
+            const container = document.getElementById('volume-chart');
+            const days = ['一', '二', '三', '四', '五', '六', '日'];
+            
+            const now = new Date();
+            const weekData = days.map((day, index) => {
+                const date = new Date(now);
+                date.setDate(now.getDate() - now.getDay() + 1 + index);
+                date.setHours(0, 0, 0, 0);
+                
+                const dayEnd = new Date(date);
+                dayEnd.setHours(23, 59, 59, 999);
+                
+                const dayWorkouts = workouts.filter(w => {
+                    const d = new Date(w.date);
+                    return d >= date && d <= dayEnd;
+                });
+                
+                return {
+                    day,
+                    volume: dayWorkouts.reduce((sum, w) => sum + (w.totalWeight || 0), 0)
+                };
+            });
+
+            const maxVolume = Math.max(...weekData.map(d => d.volume), 1);
+
+            container.innerHTML = weekData.map(d => `
+                <div class="bar" style="height: ${Math.max(d.volume / maxVolume * 100, 5)}%">
+                    <span class="bar-label">${d.day}</span>
+                </div>
+            `).join('');
+        }
+
+        // ========== 工具函数 ==========
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            if (date.toDateString() === today.toDateString()) {
+                return '今天 ' + formatTime(dateStr);
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                return '昨天 ' + formatTime(dateStr);
+            }
+            return `${date.getMonth() + 1}/${date.getDate()} ${formatTime(dateStr)}`;
+        }
+
+        function formatTime(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function showPage(page) {
+            document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
+            document.getElementById('page-' + page).style.display = 'block';
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === page);
+            });
+            return false;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (modalId === 'modal-timer') {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function showToast(message) {
+            // 简单的提示
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--text);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        function deleteWorkout(id) {
+            if (confirm('确定要删除这条训练记录吗？')) {
+                workouts = workouts.filter(w => w.id !== id);
+                localStorage.setItem('workouts', JSON.stringify(workouts));
+                updateUI();
+                showToast('已删除');
+            }
+        }
+
+        function exportData() {
+            const data = {
+                workouts: workouts,
+                plans: plans,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fitness-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            showToast('数据已导出');
+        }
+
+        function importData() {
+            document.getElementById('import-input').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.workouts) {
+                        workouts = data.workouts;
+                        localStorage.setItem('workouts', JSON.stringify(workouts));
+                    }
+                    if (data.plans) {
+                        plans = data.plans;
+                        localStorage.setItem('plans', JSON.stringify(plans));
+                    }
+                    updateUI();
+                    showToast('数据已恢复');
+                } catch (err) {
+                    showToast('导入失败：文件格式错误');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
+                workouts = [];
+                plans = [];
+                localStorage.removeItem('workouts');
+                localStorage.removeItem('plans');
+                initDefaultPlans();
+                updateUI();
+                showToast('数据已清除');
+            }
+        }
+
+        // 点击模态框外部关闭
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // 启动
+        init();
+    </script>
+</body>
+</html>
