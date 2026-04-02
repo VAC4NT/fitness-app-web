@@ -703,7 +703,60 @@
     <!-- 设置页面 -->
     <div id="page-settings" style="display: none;">
         <div class="section">
-            <div class="section-title">设置</div>
+            <div class="section-title">👤 我的档案</div>
+            
+            <!-- 个人数据卡片 -->
+            <div class="workout-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                        💪
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; opacity: 0.8;">当前体重</div>
+                        <div style="font-size: 28px; font-weight: 700;" id="profile-weight-display">-- kg</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 24px; margin-top: 16px;">
+                    <div>
+                        <div style="font-size: 11px; opacity: 0.8;">身高</div>
+                        <div style="font-weight: 600;" id="profile-height-display">-- cm</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; opacity: 0.8;">BMI</div>
+                        <div style="font-weight: 600;" id="profile-bmi-display">--</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; opacity: 0.8;">臂围</div>
+                        <div style="font-weight: 600;" id="profile-arm-display">-- cm</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; opacity: 0.8;">胸围</div>
+                        <div style="font-weight: 600;" id="profile-chest-display">-- cm</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="openProfileModal()">
+                    ✏️ 更新数据
+                </button>
+            </div>
+
+            <!-- 进步趋势 -->
+            <div class="section-title" style="margin-top: 24px;">📈 进步趋势</div>
+            <div class="chart-container">
+                <div class="chart-title">体重变化</div>
+                <div style="height: 120px;" id="weight-chart"></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">臂围变化</div>
+                <div style="height: 120px;" id="arm-chart"></div>
+            </div>
+            
+            <!-- 历史记录 -->
+            <div class="section-title" style="margin-top: 24px;">📅 记录历史</div>
+            <div id="profile-history"></div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">⚙️ 设置</div>
             <div class="workout-card" onclick="toggleTheme()">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center; gap: 12px;">
@@ -721,7 +774,7 @@
                     <span style="font-size: 24px;">📤</span>
                     <div>
                         <div style="font-weight: 600;">导出数据</div>
-                        <div style="font-size: 12px; color: var(--text-light);">备份训练记录</div>
+                        <div style="font-size: 12px; color: var(--text-light);">备份训练记录和档案</div>
                     </div>
                 </div>
             </div>
@@ -730,7 +783,7 @@
                     <span style="font-size: 24px;">📥</span>
                     <div>
                         <div style="font-weight: 600;">导入数据</div>
-                        <div style="font-size: 12px; color: var(--text-light);">恢复训练记录</div>
+                        <div style="font-size: 12px; color: var(--text-light);">恢复数据</div>
                     </div>
                 </div>
             </div>
@@ -745,7 +798,7 @@
             </div>
             <div class="workout-card">
                 <div style="text-align: center; color: var(--text-light); font-size: 12px; padding: 16px;">
-                    健身记录 App v3.0<br>
+                    健身记录 App v3.2<br>
                     Made with ❤️ by 小爪
                 </div>
             </div>
@@ -760,7 +813,7 @@
         <a href="#" class="nav-item" data-page="plans" onclick="showPage('plans')"><span>📋</span>计划</a>
         <a href="#" class="nav-item" data-page="history" onclick="showPage('history')"><span>📜</span>记录</a>
         <a href="#" class="nav-item" data-page="stats" onclick="showPage('stats')"><span>📊</span>统计</a>
-        <a href="#" class="nav-item" data-page="settings" onclick="showPage('settings')"><span>⚙️</span>设置</a>
+        <a href="#" class="nav-item" data-page="settings" onclick="showPage('settings')"><span>👤</span>我的</a>
     </div>
 
     <!-- 快速训练模态框 -->
@@ -1017,6 +1070,58 @@
         </div>
     </div>
 
+    <!-- 个人档案模态框 -->
+    <div class="modal-overlay" id="modal-profile">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📝 记录身体数据</h3>
+                <button class="modal-close" onclick="closeModal('modal-profile')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>📅 记录日期</label>
+                    <input type="date" id="profile-date">
+                </div>
+                <div class="form-group">
+                    <label>⚖️ 体重 (kg)</label>
+                    <input type="number" id="profile-weight" placeholder="例如：70" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>📏 身高 (cm)</label>
+                    <input type="number" id="profile-height" placeholder="例如：175">
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>💪 臂围 (cm)</label>
+                        <input type="number" id="profile-arm" placeholder="例如：35" step="0.1">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>🎯 胸围 (cm)</label>
+                        <input type="number" id="profile-chest" placeholder="例如：100" step="0.1">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>🦵 大腿围 (cm)</label>
+                        <input type="number" id="profile-thigh" placeholder="例如：55" step="0.1">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>🫁 腰围 (cm)</label>
+                        <input type="number" id="profile-waist" placeholder="例如：80" step="0.1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>📝 备注</label>
+                    <input type="text" id="profile-notes" placeholder="例如：增肌期第4周">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" style="flex: 1; color: var(--text-light);" onclick="closeModal('modal-profile')">取消</button>
+                <button class="btn btn-accent" style="flex: 2;" onclick="saveProfile()">✅ 保存</button>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="import-input" accept=".json" style="display: none;" onchange="handleImport(event)">
 
     <script>
@@ -1094,6 +1199,9 @@
         // 当前筛选
         let currentMuscleFilter = 'all';
 
+        // 个人档案数据
+        let profileRecords = JSON.parse(localStorage.getItem('profileRecords') || '[]');
+
         // ========== 初始化 ==========
         function init() {
             loadTheme();
@@ -1101,6 +1209,7 @@
             initDefaultPlans();
             updateUI();
             updateGreeting();
+            updateProfileDisplay();
         }
 
         function loadTheme() {
@@ -2334,7 +2443,13 @@
         }
 
         function exportData() {
-            const data = { workouts, plans, exportDate: new Date().toISOString() };
+            const data = { 
+                workouts, 
+                plans, 
+                profileRecords,
+                customExercises,
+                exportDate: new Date().toISOString() 
+            };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2364,7 +2479,17 @@
                         plans = data.plans;
                         localStorage.setItem('plans', JSON.stringify(plans));
                     }
+                    if (data.profileRecords) {
+                        profileRecords = data.profileRecords;
+                        localStorage.setItem('profileRecords', JSON.stringify(profileRecords));
+                    }
+                    if (data.customExercises) {
+                        customExercises = data.customExercises;
+                        exercises = [...defaultExercises, ...customExercises];
+                        localStorage.setItem('customExercises', JSON.stringify(customExercises));
+                    }
                     updateUI();
+                    updateProfileDisplay();
                     showToast('数据已恢复');
                 } catch (err) {
                     showToast('导入失败：文件格式错误');
@@ -2377,11 +2502,243 @@
             if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
                 workouts = [];
                 plans = [];
+                profileRecords = [];
+                customExercises = [];
                 localStorage.removeItem('workouts');
                 localStorage.removeItem('plans');
+                localStorage.removeItem('profileRecords');
+                localStorage.removeItem('customExercises');
                 initDefaultPlans();
                 updateUI();
+                updateProfileDisplay();
                 showToast('数据已清除');
+            }
+        }
+
+        // ========== 个人档案功能 ==========
+        function openProfileModal() {
+            // 设置默认日期为今天
+            document.getElementById('profile-date').value = new Date().toISOString().split('T')[0];
+            
+            // 如果有上次记录，预填身高
+            if (profileRecords.length > 0) {
+                const last = profileRecords[0];
+                if (last.height) document.getElementById('profile-height').value = last.height;
+            }
+            
+            // 清空其他输入
+            document.getElementById('profile-weight').value = '';
+            document.getElementById('profile-arm').value = '';
+            document.getElementById('profile-chest').value = '';
+            document.getElementById('profile-thigh').value = '';
+            document.getElementById('profile-waist').value = '';
+            document.getElementById('profile-notes').value = '';
+            
+            document.getElementById('modal-profile').classList.add('active');
+        }
+
+        function saveProfile() {
+            const date = document.getElementById('profile-date').value;
+            const weight = parseFloat(document.getElementById('profile-weight').value) || null;
+            const height = parseFloat(document.getElementById('profile-height').value) || null;
+            const arm = parseFloat(document.getElementById('profile-arm').value) || null;
+            const chest = parseFloat(document.getElementById('profile-chest').value) || null;
+            const thigh = parseFloat(document.getElementById('profile-thigh').value) || null;
+            const waist = parseFloat(document.getElementById('profile-waist').value) || null;
+            const notes = document.getElementById('profile-notes').value.trim() || null;
+
+            if (!weight && !arm && !chest && !thigh && !waist) {
+                showToast('请至少填写一项数据');
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                date: date || new Date().toISOString().split('T')[0],
+                timestamp: new Date().toISOString(),
+                weight,
+                height,
+                arm,
+                chest,
+                thigh,
+                waist,
+                notes
+            };
+
+            // 计算BMI
+            if (weight && height) {
+                record.bmi = (weight / Math.pow(height / 100, 2)).toFixed(1);
+            }
+
+            profileRecords.unshift(record);
+            profileRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+            localStorage.setItem('profileRecords', JSON.stringify(profileRecords));
+
+            closeModal('modal-profile');
+            updateProfileDisplay();
+            showToast('✅ 数据已记录');
+        }
+
+        function updateProfileDisplay() {
+            if (profileRecords.length === 0) {
+                document.getElementById('profile-weight-display').textContent = '-- kg';
+                document.getElementById('profile-height-display').textContent = '-- cm';
+                document.getElementById('profile-bmi-display').textContent = '--';
+                document.getElementById('profile-arm-display').textContent = '-- cm';
+                document.getElementById('profile-chest-display').textContent = '-- cm';
+                document.getElementById('profile-history').innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📊</div>
+                        <h3>还没有记录</h3>
+                        <p style="margin-top: 8px;">点击上方更新数据开始记录</p>
+                    </div>
+                `;
+                document.getElementById('weight-chart').innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 40px;">暂无数据</div>';
+                document.getElementById('arm-chart').innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 40px;">暂无数据</div>';
+                return;
+            }
+
+            const latest = profileRecords[0];
+            
+            // 更新显示
+            document.getElementById('profile-weight-display').textContent = latest.weight ? `${latest.weight} kg` : '-- kg';
+            document.getElementById('profile-height-display').textContent = latest.height ? `${latest.height} cm` : '-- cm';
+            document.getElementById('profile-bmi-display').textContent = latest.bmi || '--';
+            document.getElementById('profile-arm-display').textContent = latest.arm ? `${latest.arm} cm` : '-- cm';
+            document.getElementById('profile-chest-display').textContent = latest.chest ? `${latest.chest} cm` : '-- cm';
+
+            // 渲染历史记录
+            renderProfileHistory();
+            
+            // 渲染图表
+            renderProfileCharts();
+        }
+
+        function renderProfileHistory() {
+            const container = document.getElementById('profile-history');
+            
+            const recentRecords = profileRecords.slice(0, 10);
+            
+            container.innerHTML = recentRecords.map(r => {
+                const changes = [];
+                const index = profileRecords.indexOf(r);
+                if (index < profileRecords.length - 1) {
+                    const prev = profileRecords[index + 1];
+                    if (prev) {
+                        if (r.weight && prev.weight) {
+                            const diff = (r.weight - prev.weight).toFixed(1);
+                            if (diff !== '0.0') {
+                                changes.push(`体重 ${diff > 0 ? '+' : ''}${diff}kg`);
+                            }
+                        }
+                        if (r.arm && prev.arm) {
+                            const diff = (r.arm - prev.arm).toFixed(1);
+                            if (diff !== '0.0') {
+                                changes.push(`臂围 ${diff > 0 ? '+' : ''}${diff}cm`);
+                            }
+                        }
+                    }
+                }
+                
+                return `
+                    <div class="workout-card" style="padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600;">${formatDateShort(r.date)}</div>
+                                <div style="font-size: 12px; color: var(--text-light); margin-top: 4px;">
+                                    ${r.weight ? `⚖️ ${r.weight}kg` : ''}
+                                    ${r.arm ? ` 💪 ${r.arm}cm` : ''}
+                                    ${r.chest ? ` 🎯 ${r.chest}cm` : ''}
+                                    ${r.thigh ? ` 🦵 ${r.thigh}cm` : ''}
+                                    ${r.waist ? ` 🫁 ${r.waist}cm` : ''}
+                                </div>
+                                ${changes.length > 0 ? `<div style="font-size: 11px; color: var(--secondary); margin-top: 4px;">${changes.join(' · ')}</div>` : ''}
+                            </div>
+                            <button class="icon-btn" onclick="deleteProfileRecord(${r.id})" style="color: var(--accent);">🗑️</button>
+                        </div>
+                        ${r.notes ? `<div style="font-size: 12px; color: var(--text-light); margin-top: 8px;">📝 ${r.notes}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatDateShort(dateStr) {
+            const date = new Date(dateStr);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            if (date.toDateString() === today.toDateString()) {
+                return '今天';
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                return '昨天';
+            }
+            return `${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+
+        function renderProfileCharts() {
+            // 取最近10条记录，按日期正序排列
+            const records = profileRecords.slice(0, 10).reverse();
+            
+            // 体重图表
+            const weightChart = document.getElementById('weight-chart');
+            const weightData = records.filter(r => r.weight);
+            if (weightData.length > 1) {
+                const minWeight = Math.min(...weightData.map(r => r.weight));
+                const maxWeight = Math.max(...weightData.map(r => r.weight));
+                const range = maxWeight - minWeight || 1;
+                
+                weightChart.innerHTML = `
+                    <div style="display: flex; align-items: flex-end; height: 100%; gap: 4px;">
+                        ${weightData.map((r, i) => {
+                            const height = ((r.weight - minWeight) / range * 80 + 20);
+                            return `
+                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                                    <div style="font-size: 10px; color: var(--text-light); margin-bottom: 4px;">${r.weight}</div>
+                                    <div style="width: 100%; height: ${height}px; background: linear-gradient(180deg, var(--primary), var(--primary-light)); border-radius: 4px 4px 0 0;"></div>
+                                    <div style="font-size: 9px; color: var(--text-light); margin-top: 4px;">${new Date(r.date).getDate()}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                weightChart.innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 40px;">需要至少2条记录</div>';
+            }
+
+            // 臂围图表
+            const armChart = document.getElementById('arm-chart');
+            const armData = records.filter(r => r.arm);
+            if (armData.length > 1) {
+                const minArm = Math.min(...armData.map(r => r.arm));
+                const maxArm = Math.max(...armData.map(r => r.arm));
+                const range = maxArm - minArm || 1;
+                
+                armChart.innerHTML = `
+                    <div style="display: flex; align-items: flex-end; height: 100%; gap: 4px;">
+                        ${armData.map((r, i) => {
+                            const height = ((r.arm - minArm) / range * 80 + 20);
+                            return `
+                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                                    <div style="font-size: 10px; color: var(--text-light); margin-bottom: 4px;">${r.arm}</div>
+                                    <div style="width: 100%; height: ${height}px; background: linear-gradient(180deg, var(--secondary), var(--secondary-dark)); border-radius: 4px 4px 0 0;"></div>
+                                    <div style="font-size: 9px; color: var(--text-light); margin-top: 4px;">${new Date(r.date).getDate()}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                armChart.innerHTML = '<div style="text-align: center; color: var(--text-light); padding: 40px;">需要至少2条记录</div>';
+            }
+        }
+
+        function deleteProfileRecord(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                profileRecords = profileRecords.filter(r => r.id !== id);
+                localStorage.setItem('profileRecords', JSON.stringify(profileRecords));
+                updateProfileDisplay();
+                showToast('已删除');
             }
         }
 
